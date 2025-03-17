@@ -1,0 +1,201 @@
+{
+    "cards": [
+        {
+            "_id": 1,
+            "name": "Sales",
+            "amount": 145,
+            "percentage": 0.12,
+            "active":true
+        },
+        {
+            "_id": 2,
+            "name": "Revenue",
+            "amount": 3246,
+            "percentage": 0.08,
+            "active":false
+        },
+        {
+            "_id": 3,
+            "name": "Customers",
+            "amount": 1244,
+            "percentage": -0.11,
+            "active":false
+        }
+    ],
+    "news":[
+        {
+            "_id": 1,
+            "title": "nhsheh njxbh jwbwv",
+            "subtitle": "Sit reucumpensate hfncbu",
+            "category": "abc"
+        },
+        {
+            "_id": 2,
+            "title": "nhsheh njxbh jwbwv",
+            "subtitle": "Sit reucumpensate hfncbu",
+            "category": "abc"
+        },
+        {
+            "_id": 3,
+            "title": "nhsheh njxbh jwbwv",
+            "subtitle": "Sit reucumpensate hfncbu",
+            "category": "abc"
+        },
+        {
+            "_id": 4,
+            "title": "nhsheh njxbh jwbwv",
+            "subtitle": "Sit reucumpensate hfncbu",
+            "category": "abc"
+        },
+        {
+            "_id": 5,
+            "title": "nhsheh njxbh jwbwv",
+            "subtitle": "Sit reucumpensate hfncbu",
+            "category": "abc"
+        } 
+    ],
+    "topselling":[
+        {
+            "_id": 1,
+            "name": "nhbciedeunn",
+            "price": 64,
+            "sold": 124
+        },
+        {
+            "_id": 2,
+            "name": "nhbciedeunn",
+            "price": 64,
+            "sold": 98
+        },
+        {
+            "_id": 3,
+            "name": "nhbciedeunn",
+            "price": 59,
+            "sold": 74
+        },
+        {
+            "_id": 4,
+            "name": "nhbciedeunn",
+            "price": 32,
+            "sold": 63
+        },
+        {
+            "_id": 5,
+            "name": "nhbciedeunn",
+            "price": 79,
+            "sold": 41
+        }
+    ],
+    "recentsales": [
+        {
+            "_id": 1,
+            "number": "#2457",
+            "customer": "Brandon Jacob",
+            "product": "Serum Facial",
+            "price":64,
+            "status": "Approved"
+        },
+        {
+            "_id": 2,
+            "number": "#2347",
+            "customer": "Bredie Kessler",
+            "product": "Serum",
+            "price":47,
+            "status": "Pending"
+        },
+        {
+            "_id": 3,
+            "number": "#2449",
+            "customer": "Ashley Kessler",
+            "product": "StemRegen",
+            "price":147,
+            "status": "Approved"
+        },
+        {
+            "_id": 4,
+            "number": "#2644",
+            "customer": "Angus Grey",
+            "product": "Cream",
+            "price":67,
+            "status": "Rejected"
+        },
+        {
+            "_id": 5,
+            "number": "#3592",
+            "customer": "Raheem Lamar",
+            "product": "Facial Cleanser",
+            "price":135,
+            "status": "Approved"
+        }
+    ],
+    "recentactivity": [
+        {
+            "_id": 1,
+            "time": "32 min",
+            "color": "text-success",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": "explicabo tehfsdyt"
+        },
+        {
+            "_id": 2,
+            "time": "56 min",
+            "color": "text-danger",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": ""
+        },
+        {
+            "_id": 3,
+            "time": "2 hrs",
+            "color": "text-primary",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": ""
+        },
+        {
+            "_id": 4,
+            "time": "1 day",
+            "color": "text-info",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": "explicabo tehfsdyt"
+        },
+        {
+            "_id": 5,
+            "time": "2 days",
+            "color": "text-warning",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": "explicabo tehfsdyt"
+        },
+        {
+            "_id": 6,
+            "time": "4 weeks",
+            "color": "text-muted",
+            "content": "ddwffkbcsbf sckf",
+            "highlight": ""
+        }
+    ],
+    "medications": [
+        {
+            "_id": 1,
+            "name": "Ecxosomes",
+            "category": "stem cell medication",
+            "quant_in_stock": 50,
+            "sold": 30,
+            "status": "In Stock"
+        },
+        {
+            "_id": 2,
+            "name": "Umbylical cords",
+            "category": "stem cell medication",
+            "quant_in_stock": 40,
+            "sold": 20,
+            "status": "In Stock"
+        },
+        {
+            "_id": 3,
+            "name": "Camatic Plasma",
+            "category": "weight loss",
+            "quant_in_stock": 0,
+            "sold": 40,
+            "status":"Out Of Stock"
+        }
+    ]
+}
