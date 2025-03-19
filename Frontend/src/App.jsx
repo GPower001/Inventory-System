@@ -12,13 +12,16 @@ import AddItemPage from './components/AddItemPage';
 import MedicationPage from './components/MedicationPage';
 import ConsumablePage from './components/ConsumablePage';
 import GeneralPage from './components/GeneralPage';
+import Login from './components/Login';
 
 function App() {
   
 
   return (
     <>
-     <BrowserRouter>
+
+    <Login/>
+     {/* <BrowserRouter>
       <Header />
       <SideBar/>
       <Routes>
@@ -30,7 +33,7 @@ function App() {
       </Routes>
       <BackToTop />
       <Footer />
-    </BrowserRouter>
+    </BrowserRouter> */}
     </>
   )
 }
