@@ -1,0 +1,41 @@
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./layout/DashboardLayout";
+import Inventory from "./pages/Inventory";
+import AddItems from "./pages/AddItems";
+import AddItemPage from "./components/AddItemPage";
+import MedicationPage from "./components/MedicationPage";
+import ConsumablePage from "./components/ConsumablePage";
+import GeneralPage from "./components/GeneralPage";
+import Login from "./components/Login";
+
+// Protected Route as a Component
+const ProtectedRoute = ({ children }) => {
+  const authToken = localStorage.getItem("authToken");
+  return authToken ? children : <Navigate to="/login" replace />;
+};
+
+const router = createBrowserRouter([
+  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/login", element: <Login /> },
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Dashboard /> },
+      { path: "inventory", element: <Inventory /> },
+      { path: "add-item", element: <AddItems /> },
+      { path: "add_item", element: <AddItemPage /> },
+      { path: "medication", element: <MedicationPage /> },
+      { path: "consumables", element: <ConsumablePage /> },
+      { path: "generals", element: <GeneralPage /> },
+    ],
+  },
+  { path: "*", element: <Navigate to="/dashboard" replace /> },
+]);
+
+export default router;
