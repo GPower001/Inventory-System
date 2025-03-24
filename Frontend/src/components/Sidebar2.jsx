@@ -113,7 +113,7 @@
 
 // export default Sidebar;
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -126,11 +126,13 @@ import {
   Menu,
   ChevronLeft,
 } from "lucide-react";
+import { UserContext } from "../context/UserContext"; 
 import "bootstrap/dist/css/bootstrap.min.css"; // Ensure Bootstrap is included
 
 const Sidebar = () => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useContext(UserContext);
 
   const isActive = (path) => location.pathname === path;
 
@@ -202,7 +204,9 @@ const Sidebar = () => {
         </li>
 
         <li>
-          <button className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2">
+          <button 
+          onClick={logout}
+          className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2">
             <LogOut size={18} />
             {!isCollapsed && <span>Logout</span>}
           </button>

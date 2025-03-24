@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import for navigation
+import axios from "axios";
 import {
   Search,
   Plus,
@@ -11,27 +13,46 @@ import {
 } from "lucide-react";
 
 const Inventory = () => {
-  const [items, setItems] = useState([
-    { id: 1, name: "MAKOPOLO", quantity: 2, salePrice: 0, purchasePrice: 0 },
-  ]);
-
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate(); // For navigation
 
-  const addItem = () => {
-    const newItem = {
-      id: items.length + 1,
-      name: `Item ${items.length + 1}`,
-      quantity: Math.floor(Math.random() * 10) + 1,
-      salePrice: 1000,
-      purchasePrice: 800,
+    // Fetch items from the backend
+    useEffect(() => {
+      const fetchItems = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/items`);
+          setItems(response.data);
+        } catch (error) {
+          console.error("Error fetching inventory:", error);
+          setError("Failed to load items.");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchItems();
+    }, []);
+  
+    // Navigate to add-item page
+    const handleAddItem = () => {
+      navigate("/dashboard/add-item");
     };
-    setItems([...items, newItem]);
-  };
 
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+
+    const filteredItems = items.filter(
+      (item) => item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+
+    
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+    
 
   return (
     <div>
@@ -44,7 +65,7 @@ const Inventory = () => {
         </div>
 
         {/* Search Input */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 ">
           <input
             type="text"
             placeholder="Search..."
@@ -52,7 +73,7 @@ const Inventory = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search className="w-5 h-5 text-gray-300" />
+          <Search className="w-5 h-5 text-gray-300 -translate-x-6" />
         </div>
       </div>
 
@@ -61,7 +82,7 @@ const Inventory = () => {
         <div className="py-4 w-1/2">
           {/* Add Item Button */}
           <button
-            onClick={addItem}
+             onClick={handleAddItem}
             className="flex items-center bg-teal-500 text-white font-semibold px-6 py-3 rounded-full shadow-md hover:bg-teal-600 transition"
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -94,8 +115,8 @@ const Inventory = () => {
                       } hover:bg-teal-500 transition`}
                       onClick={() => setSelectedItem(item)}
                     >
-                      <td className="px-4 py-3">{item.name}</td>
-                      <td className="px-4 py-3">{item.quantity}</td>
+                      <td className="px-4 py-3">{item.itemName}</td>
+                      <td className="px-4 py-3">{item.openingQty}</td>
                     </tr>
                   ))
                 ) : (

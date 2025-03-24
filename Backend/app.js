@@ -31,6 +31,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import authRoutes from "./routes/authRoutes.js";
+import itemRoutes from "./routes/itemRoutes.js";
 
 const app = express();
 
@@ -57,6 +58,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // **Routes**
 app.use("/auth", authRoutes);
+app.use("/uploads", express.static("uploads"));
+app.use("/api/items", itemRoutes);
+
 
 // **Global Error Handler**
 app.use((err, req, res, next) => {

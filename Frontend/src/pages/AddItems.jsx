@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ImagePlus, Calendar, X } from "lucide-react";
+import axios from "axios";
 
 const AddItems = ({ onClose }) => {
   const [enabled, setEnabled] = useState(false);
@@ -11,14 +12,17 @@ const AddItems = ({ onClose }) => {
   const [itemCode, setItemCode] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Generate random item code
+
+  const endpoint = "/api/items"; // Define this variable before using it
+
+
   const generateItemCode = () => {
     const code = `ITEM-${Math.floor(1000 + Math.random() * 9000)}`;
     setItemCode(code);
   };
 
-  // Handle Image Upload
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -27,38 +31,53 @@ const AddItems = ({ onClose }) => {
     }
   };
 
-  // Handle Form Submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+
     if (!itemName || !category) {
       alert("Please fill in required fields.");
+      setLoading(false);
       return;
     }
 
-    const newItem = {
-      itemName,
-      category,
-      enabled: enabled ? "Service" : "Product",
-      openingQty,
-      minStock,
-      date,
-      itemCode,
-      image,
-    };
+    try {
+      const formData = new FormData();
+      formData.append("itemName", itemName);
+      formData.append("category", category);
+      formData.append("enabled", enabled ? "Service" : "Product");
+      formData.append("openingQty", openingQty);
+      formData.append("minStock", minStock);
+      formData.append("date", date);
+      formData.append("itemCode", itemCode);
+      if (image) formData.append("image", image);
 
-    console.log("Item Added:", newItem);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}${endpoint}`,
+         formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    // Reset Form
-    setItemName("");
-    setCategory("");
-    setOpeningQty("");
-    setMinStock("");
-    setDate("2025-02-24");
-    setItemCode("");
-    setImage(null);
-    setImagePreview("");
+      alert("Item added successfully!");
+      console.log(response.data);
+
+      setItemName("");
+      setCategory("");
+      setOpeningQty("");
+      setMinStock("");
+      setDate("2025-02-24");
+      setItemCode("");
+      setImage(null);
+      setImagePreview("");
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Failed to add item.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+
 
   return (
     <div>
@@ -205,3 +224,6 @@ const AddItems = ({ onClose }) => {
 };
 
 export default AddItems;
+
+
+
