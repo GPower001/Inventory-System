@@ -61,7 +61,6 @@ app.use("/auth", authRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/items", itemRoutes);
 
-
 // **Global Error Handler**
 app.use((err, req, res, next) => {
     console.error(err.stack);
