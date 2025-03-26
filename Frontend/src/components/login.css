@@ -23,7 +23,7 @@ body {
 
 /* Buttons */
 .content button {
-    background-color: #82257b;
+    background-color: #42aeb5;
     color: #fff;
     padding: 10px 10px;
     border: 1px solid transparent;
@@ -37,12 +37,12 @@ body {
 }
 
 .content button:hover {
-    background-color: #6d1f66;
+    background-color: #184548;
 }
 
 /* Text Styling */
 .header-text h1, .forgot a {
-    color: #82257b;
+    color: #42aeb5;
 }
 
 /* Form Containers */
@@ -100,7 +100,7 @@ body {
 
 /* Switch Panel */
 .switch {
-    background-color: #82257b;
+    background-color: #42aeb5;
     height: 100%;
     color: #fff;
     position: relative;
