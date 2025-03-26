@@ -52,7 +52,7 @@ import "./App.css"
 
 const App = () => {
   return (
-    <UserProvider>
+  <UserProvider>
     <RouterProvider router={router} />
   </UserProvider>
   )

@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import './dashboard.css'
-import Cards from './Cards';
-import Reports from './Reports';
-import RecentSales from './RecentSales';
-import TopSelling from './TopSelling';
-import RecentActivities from './RecentActivities';
-import BudgetReport from './BudgetReport';
+import Cards from '../components/Cards';
+import Reports from '../components/Reports';
+import RecentSales from '../components/RecentSales';
+import TopSelling from '../components/TopSelling';
+import RecentActivities from '../components/RecentActivities';
+import BudgetReport from '../components/BudgetReport';
 
 
 function Dashboard() {
