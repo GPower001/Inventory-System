@@ -448,6 +448,11 @@ const Sidebar = () => {
     setIsInventoryOpen(!isInventoryOpen);
   };
 
+  const handleLogout = () => {
+    logout(); // Call the logout function from context
+    navigate('/login'); // Redirect to login page after logout
+  };
+
   return (
     <div
       className={`d-flex flex-column bg-light shadow-sm border-end vh-100 transition-all`}
@@ -592,7 +597,7 @@ const Sidebar = () => {
 
         <li>
           <button 
-            onClick={logout}
+            onClick={handleLogout}
             className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
           >
             <LogOut size={18} />
