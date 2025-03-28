@@ -137,9 +137,9 @@ const AddItems = ({ onClose }) => {
                   required
                 >
                   <option value="">Select</option>
-                  <option value="Electronics">Medications</option>
-                  <option value="Clothing">Consumables</option>
-                  <option value="Furniture">Generals</option>
+                  <option value="Medication">Medications</option>
+                  <option value="Consumables">Consumables</option>
+                  <option value="Generals">Generals</option>
                 </select>
               </div>
 

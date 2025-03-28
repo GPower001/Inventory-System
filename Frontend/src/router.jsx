@@ -8,6 +8,7 @@ import MedicationPage from "./components/MedicationPage";
 import ConsumablePage from "./components/ConsumablePage";
 import GeneralPage from "./components/GeneralPage";
 import Login from "./components/Login";
+import AdjustStockPage from "./pages/AdjustStockPage";
 
 // Protected Route as a Component
 const ProtectedRoute = ({ children }) => {
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
       { path: "inventory", element: <Inventory /> },
       { path: "add-item", element: <AddItems /> },
       { path: "add_item", element: <AddItemPage /> },
+      { path: "adjust-stock", element: <AdjustStockPage/>},
       { path: "/dashboard/inventory/medication", element: <MedicationPage /> },
       { path: "/dashboard/inventory/consumables", element: <ConsumablePage /> },
       { path: "/dashboard/inventory/general", element: <GeneralPage /> },
