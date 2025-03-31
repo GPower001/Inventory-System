@@ -24,5 +24,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# dotenv environment variable files
+# Ignore environment variables
 .env
+.env.local
+.env.*.local
+
