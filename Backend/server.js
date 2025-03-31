@@ -1,4 +1,4 @@
-  import cors from "cors";
+import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 import http from "http";
@@ -6,73 +6,107 @@ import { Server } from "socket.io";
 import connectDB from "./config/db.js";
 import app from "./app.js";
 import swaggerDocs from "./swagger.js";
+import { errorHandler } from "./middleware/errorMiddleware.js";
+import morgan from "morgan";
+import { apiLimiter, authLimiter } from "./config/rateLimit.js";
 
 dotenv.config();
 connectDB();
 
 const server = http.createServer(app);
 
+// =======================
+// 1. Middleware Setup
+// =======================
+app.use(morgan("dev")); // HTTP request logging
+
 const allowedOrigins = [
-    "http://localhost:5173", 
-    process.env.FRONTEND_URL,  // Ensure this is correctly defined in `.env`
+  "http://localhost:5173", 
+  process.env.FRONTEND_URL,
 ];
 
-// **CORS Middleware for Express (Fix for Credentials Issue)**
+// CORS Configuration
 app.use(
-    cors({
-        origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true); // Allow the request
-            } else {
-                callback(new Error("Not allowed by CORS"));
-            }
-        },
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: true, // Required for authentication
-    })
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
 );
 
-// Allow Preflight Requests
 app.options("*", cors());
 
-// **Socket.io CORS Fix**
+// Rate Limiting
+app.use("/api/", apiLimiter); // General API limiter
+app.use("/api/auth", authLimiter); // Strict auth limiter
+
+// =======================
+// 2. Socket.IO Setup
+// =======================
 const io = new Server(server, {
-    cors: {
-        origin: allowedOrigins, // No "*", only specific frontend URLs
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: true,
-    },
+  cors: {
+    origin: allowedOrigins, // Fixed typo from allowedOrigins
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  },
 });
 
-// **Attach Socket.io to Requests for Real-Time Updates**
+// Attach Socket.io to requests
 app.use((req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
 });
 
-// **Swagger Documentation**
+// Socket.IO Events
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
+
+  socket.emit("welcome", { message: "Welcome to the WebSocket server!" });
+
+  socket.on("updateData", (data) => {
+    console.log("Received updateData:", data);
+    io.emit("dataUpdated", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
+// =======================
+// 3. Routes & Documentation
+// =======================
+// Health Check
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ 
+    status: "OK", 
+    timestamp: new Date(),
+    uptime: process.uptime()
+  });
+});
+
+// Swagger Documentation
 swaggerDocs(app);
 
-// **WebSocket Connection Handling**
-io.on("connection", (socket) => {
-    console.log("New client connected:", socket.id);
+// =======================
+// 4. Error Handling (MUST BE LAST)
+// =======================
+app.use(errorHandler);
 
-    socket.emit("welcome", { message: "Welcome to the WebSocket server!" });
-
-    socket.on("updateData", (data) => {
-        console.log("Received updateData:", data);
-        io.emit("dataUpdated", data); // Broadcast update
-    });
-
-    socket.on("disconnect", () => {
-        console.log("Client disconnected:", socket.id);
-    });
-});
-
-// **Start Server**
+// =======================
+// 5. Server Startup
+// =======================
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`📄 API Docs at http://localhost:${PORT}/api-docs`);
+  console.log(`⚡ WebSocket ready at ws://localhost:${PORT}`);
 });

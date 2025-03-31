@@ -28,6 +28,7 @@
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "paystack-api": "^2.0.6",
+    "sanitize-filename": "^1.6.3",
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

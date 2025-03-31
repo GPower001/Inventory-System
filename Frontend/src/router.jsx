@@ -9,6 +9,7 @@ import ConsumablePage from "./components/ConsumablePage";
 import GeneralPage from "./components/GeneralPage";
 import Login from "./components/Login";
 import AdjustStockPage from "./pages/AdjustStockPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Protected Route as a Component
 const ProtectedRoute = ({ children }) => {
@@ -27,7 +28,11 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Dashboard /> },
+      { index: true, element: 
+        <ErrorBoundary>
+          <Dashboard />
+        </ErrorBoundary>
+       },
       { path: "inventory", element: <Inventory /> },
       { path: "add-item", element: <AddItems /> },
       { path: "add_item", element: <AddItemPage /> },
