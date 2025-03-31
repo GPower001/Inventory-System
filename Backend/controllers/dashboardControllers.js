@@ -50,89 +50,126 @@
 //   }
 // };
 
-import Item from "../models/Item.js";
-import Order from "../models/Order.js";
+// import Item from "../models/Item.js";
+// import Order from "../models/Order.js";
 
-// Dashboard Statistics
+// // Dashboard Statistics
+// export const getDashboardStats = async (req, res) => {
+//   try {
+//     const today = new Date();
+    
+//     const [totalProducts, lowStockItems, expiredItems] = await Promise.all([
+//       Item.countDocuments(),
+//       // Use either the direct number (10) or $minStock field from your items
+//       Item.countDocuments({ $expr: { $lt: ["$quantity", "$minStock"] } }), // More dynamic
+//       Item.countDocuments({ expirationDate: { $lt: today } })
+//     ]);
+
+//     res.json({
+//       success: true,
+//       data: {
+//         totalProducts,
+//         lowStockItems,
+//         expiredItems,
+//         lastUpdated: new Date()
+//       }
+//     });
+    
+//   } catch (error) {
+//     res.status(500).json({ 
+//       success: false,
+//       error: "Failed to load dashboard data" 
+//     });
+//   }
+// };
+
+// // Revenue Data (Simplified)
+// export const getRevenueData = async (req, res) => {
+//   try {
+//     // Get revenue for current year only
+//     const revenueData = await Order.aggregate([
+//       {
+//         $match: {
+//           createdAt: {
+//             $gte: new Date(new Date().getFullYear(), 0, 1), // Start of year
+//             $lt: new Date(new Date().getFullYear() + 1, 0, 1) // Start of next year
+//           }
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: { $month: "$createdAt" },
+//           total: { $sum: "$totalAmount" }
+//         }
+//       },
+//       {
+//         $project: {
+//           month: "$_id",
+//           total: 1,
+//           _id: 0
+//         }
+//       }
+//     ]);
+
+//     // Map to month names
+//     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+//     const formattedData = monthNames.map((name, index) => {
+//       const monthData = revenueData.find(d => d.month === index + 1);
+//       return {
+//         month: name,
+//         total: monthData?.total || 0
+//       };
+//     });
+
+//     res.json({
+//       success: true,
+//       data: {
+//         months: formattedData.map(d => d.month),
+//         amounts: formattedData.map(d => d.total)
+//       }
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       error: "Failed to load revenue data"
+//     });
+//   }
+// };
+
+import Item from '../models/Item.js';
+import Revenue from '../models/Revenue.js';
+
 export const getDashboardStats = async (req, res) => {
   try {
-    const today = new Date();
-    
     const [totalProducts, lowStockItems, expiredItems] = await Promise.all([
       Item.countDocuments(),
-      // Use either the direct number (10) or $minStock field from your items
-      Item.countDocuments({ $expr: { $lt: ["$quantity", "$minStock"] } }), // More dynamic
-      Item.countDocuments({ expirationDate: { $lt: today } })
+      Item.countDocuments({ $expr: { $lt: ['$quantity', '$minStock'] } }),
+      Item.countDocuments({ expirationDate: { $lt: new Date() } })
     ]);
 
     res.json({
-      success: true,
-      data: {
-        totalProducts,
-        lowStockItems,
-        expiredItems,
-        lastUpdated: new Date()
-      }
+      totalProducts,
+      lowStockItems,
+      expiredItems,
+      lastUpdated: new Date()
     });
-    
-  } catch (error) {
-    res.status(500).json({ 
-      success: false,
-      error: "Failed to load dashboard data" 
-    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Revenue Data (Simplified)
 export const getRevenueData = async (req, res) => {
   try {
-    // Get revenue for current year only
-    const revenueData = await Order.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date(new Date().getFullYear(), 0, 1), // Start of year
-            $lt: new Date(new Date().getFullYear() + 1, 0, 1) // Start of next year
-          }
-        }
-      },
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          total: { $sum: "$totalAmount" }
-        }
-      },
-      {
-        $project: {
-          month: "$_id",
-          total: 1,
-          _id: 0
-        }
-      }
-    ]);
-
-    // Map to month names
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const formattedData = monthNames.map((name, index) => {
-      const monthData = revenueData.find(d => d.month === index + 1);
-      return {
-        month: name,
-        total: monthData?.total || 0
-      };
-    });
+    const revenues = await Revenue.find()
+      .sort({ year: 1, month: 1 })
+      .limit(12);
 
     res.json({
-      success: true,
-      data: {
-        months: formattedData.map(d => d.month),
-        amounts: formattedData.map(d => d.total)
-      }
+      months: revenues.map(r => r.month),
+      amounts: revenues.map(r => r.amount)
     });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to load revenue data"
-    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

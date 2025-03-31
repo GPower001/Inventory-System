@@ -43,6 +43,10 @@ app.use(
 
 app.options("*", cors());
 
+// Routes
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/items', itemRoutes);
+
 // Rate Limiting
 app.use("/api/", apiLimiter); // General API limiter
 app.use("/api/auth", authLimiter); // Strict auth limiter
@@ -52,7 +56,7 @@ app.use("/api/auth", authLimiter); // Strict auth limiter
 // =======================
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins, // Fixed typo from allowedOrigins
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173/', // Fixed typo from allowedOrigins
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -81,6 +85,10 @@ io.on("connection", (socket) => {
   });
 });
 
+// Broadcast inventory Updates
+export const broadcastInventoryUpdate = () => {
+  io.emit('inventoryUpdate');
+};
 // =======================
 // 3. Routes & Documentation
 // =======================

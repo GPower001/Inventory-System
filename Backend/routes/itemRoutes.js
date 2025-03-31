@@ -149,6 +149,7 @@ import { asyncHandler } from '../app.js';
 import Item from '../models/Item.js';
 import upload from "../middlewares/uploadMiddleware.js";
 import authenticate from "../middlewares/authMiddleware.js";
+import { getItems } from '../controllers/itemController.js'
 
 const router = express.Router();
 
@@ -194,7 +195,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', getItems, asyncHandler(async (req, res) => {
   const { limit, filter } = req.query;
   let query = {};
 
