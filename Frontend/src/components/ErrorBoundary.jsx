@@ -92,12 +92,48 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught:", error, errorInfo);
     this.setState({ errorInfo });
+    this.logErrorToService(error, errorInfo);
     
     // Log to error tracking service (e.g., Sentry)
     if (process.env.NODE_ENV === 'production') {
-      // this.logErrorToService(error, errorInfo);
+      this.logErrorToService(error, errorInfo);
     }
   }
+
+   // ▼ Add this method right here ▼
+   logErrorToService = (error, errorInfo) => {
+    // Example: Send to Sentry/LogRocket/etc
+    if (window.Sentry) {
+      window.Sentry.captureException(error, { 
+        context: {
+          react: {
+            componentStack:errorInfo.componentStack
+          }
+        }
+      });
+    }
+    // Add other error services as needed
+    if (window.LogRocket && window.LogRocket.trackError) {
+      window.LogRocket.trackError(error, {
+        componentStack: errorInfo.componentStack
+      });
+    }
+  };
+
+    // // 3. Custom backend logging (example)
+    // if (process.env.NODE_ENV === 'production') {
+    //   fetch('/api/log-error', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //       error: error.toString(),
+    //       stack: error.stack,
+    //       componentStack: errorInfo.componentStack,
+    //       url: window.location.href
+    //     })
+    //   }).catch(e => console.error('Failed to log error:', e));
+    // }
+    // };
 
   handleReload = () => {
     this.setState({ isReloading: true });

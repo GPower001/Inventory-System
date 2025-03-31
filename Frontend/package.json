@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bugsnag/js": "^8.2.0",
+    "@bugsnag/plugin-react": "^8.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@popperjs/core": "^2.11.8",
     "@remixicons/react": "^4.6.1",
+    "@sentry/react": "^9.10.1",
+    "@sentry/tracing": "^7.120.3",
     "@tailwindcss/vite": "^4.0.15",
     "apexcharts": "^4.5.0",
     "axios": "^1.8.4",
@@ -22,6 +26,7 @@
     "boxicons": "^2.1.4",
     "chart.js": "^4.4.8",
     "echarts-for-react": "^3.0.2",
+    "logrocket": "^9.0.2",
     "lucide-react": "^0.483.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
