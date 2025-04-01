@@ -145,13 +145,13 @@
 // export default router;
 
 import express from "express";
-import { asyncHandler } from '../app.js';
+import { asyncHandler } from "../utils/asyncHandler.js";
 import Item from '../models/Item.js';
 import upload from "../middlewares/uploadMiddleware.js";
 import authenticate from "../middlewares/authMiddleware.js";
 import { getItems } from '../controllers/itemController.js'
 
-const router = express.Router();
+const itemRouter = express.Router();
 
 /**
  * @swagger
@@ -195,7 +195,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get('/', getItems, asyncHandler(async (req, res) => {
+itemRouter.get('/', getItems, asyncHandler(async (req, res) => {
   const { limit, filter } = req.query;
   let query = {};
 
@@ -306,7 +306,7 @@ router.get('/', getItems, asyncHandler(async (req, res) => {
  *       scheme: bearer
  *       bearerFormat: JWT
  */
-router.post('/', 
+itemRouter.post('/', 
   authenticate, 
   upload.single('image'), 
   asyncHandler(async (req, res) => {
@@ -323,4 +323,4 @@ router.post('/',
   })
 );
 
-export default router;
+export default itemRouter;

@@ -6,9 +6,11 @@ import { Server } from "socket.io";
 import connectDB from "./config/db.js";
 import app from "./app.js";
 import swaggerDocs from "./swagger.js";
-import { errorHandler } from "./middleware/errorMiddleware.js";
+import { errorHandler } from "./middlewares/errorMiddleware.js";
 import morgan from "morgan";
 import { apiLimiter, authLimiter } from "./config/rateLimit.js";
+import router from './routes/dashboardRoutes.js';
+import itemRouter from "./routes/itemRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -44,8 +46,8 @@ app.use(
 app.options("*", cors());
 
 // Routes
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/items', itemRoutes);
+app.use('/api/dashboard', router);
+app.use('/api/items', itemRouter);
 
 // Rate Limiting
 app.use("/api/", apiLimiter); // General API limiter
@@ -112,7 +114,7 @@ app.use(errorHandler);
 // =======================
 // 5. Server Startup
 // =======================
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(`📄 API Docs at http://localhost:${PORT}/api-docs`);

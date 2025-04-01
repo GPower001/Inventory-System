@@ -2,8 +2,8 @@ import express from "express";
 import { 
   getDashboardStats,
   getRevenueData
-} from "../controllers/dashboardController.js";
-import { authenticate } from "../middleware/authMiddleware.js";
+} from "../controllers/dashboardControllers.js";
+import  authenticate  from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 

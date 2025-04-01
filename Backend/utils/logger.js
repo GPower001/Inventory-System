@@ -1,6 +1,13 @@
 import { existsSync, mkdirSync, appendFile } from 'fs';
 import { join } from 'path';
 import { format } from 'date-fns';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+
+// Get the current directory path (equivalent to __dirname)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Ensure logs directory exists
 const logDir = join(__dirname, '../../logs');
@@ -8,7 +15,7 @@ if (!existsSync(logDir)) {
   mkdirSync(logDir);
 }
 
-const logToFile = (message, level = 'error') => {
+export const logToFile = (message, level = 'error') => {
   const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
   const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
   
@@ -21,7 +28,7 @@ const logToFile = (message, level = 'error') => {
 };
 
 // For API errors (includes request context)
-const logApiError = (error, req) => {
+export const logApiError = (error, req) => {
   const context = {
     timestamp: new Date(),
     path: req.path,
@@ -36,5 +43,3 @@ const logApiError = (error, req) => {
   
   logToFile(JSON.stringify(context, null, 2));
 };
-
-export default { logToFile, logApiError };

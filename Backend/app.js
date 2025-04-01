@@ -151,9 +151,8 @@ import authRoutes from "./routes/authRoutes.js";
 import itemRoutes from "./routes/itemRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 
-// Async handler utility
-const asyncHandler = (fn) => (req, res, next) => 
-  Promise.resolve(fn(req, res, next)).catch(next);
+
+  
 
 const app = express();
 

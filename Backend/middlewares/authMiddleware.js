@@ -16,8 +16,8 @@
 // export { authenticate };
 
 import jwt from 'jsonwebtoken';
-import { asyncHandler } from '../app.js';
-import User from '../models/User.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import User from '../models/userModel.js';
 
 /**
  * JWT Authentication Middleware
@@ -31,7 +31,7 @@ import User from '../models/User.js';
  * - 401 if invalid/expired token
  * - 404 if user not found
  */
-export const authenticate = asyncHandler(async (req, res, next) => {
+const authenticate = asyncHandler(async (req, res, next) => {
   // 1. Extract token
   const authHeader = req.headers.authorization;
   const token = authHeader?.split(' ')[1];
@@ -66,3 +66,4 @@ export const authenticate = asyncHandler(async (req, res, next) => {
     throw error; // Re-throw other errors
   }
 });
+export default authenticate
