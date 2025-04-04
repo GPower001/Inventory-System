@@ -1,122 +1,106 @@
-import cors from "cors";
-import express from "express";
-import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import connectDB from "./config/db.js";
 import app from "./app.js";
 import swaggerDocs from "./swagger.js";
-import { errorHandler } from "./middlewares/errorMiddleware.js";
-import morgan from "morgan";
-import { apiLimiter, authLimiter } from "./config/rateLimit.js";
-import router from './routes/dashboardRoutes.js';
-import itemRouter from "./routes/itemRoutes.js";
 
+// Load environment variables
 dotenv.config();
+
+// Ensure uploads directory exists
+const uploadsDir = path.resolve("uploads");
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Connect to MongoDB
 connectDB();
 
+// Create HTTP server
 const server = http.createServer(app);
 
-// =======================
-// 1. Middleware Setup
-// =======================
-app.use(morgan("dev")); // HTTP request logging
-
-const allowedOrigins = [
-  "http://localhost:5173", 
-  process.env.FRONTEND_URL,
-];
-
-// CORS Configuration
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
-
-app.options("*", cors());
-
-// Routes
-app.use('/api/dashboard', router);
-app.use('/api/items', itemRouter);
-
-// Rate Limiting
-app.use("/api/", apiLimiter); // General API limiter
-app.use("/api/auth", authLimiter); // Strict auth limiter
-
-// =======================
-// 2. Socket.IO Setup
-// =======================
+// Initialize Socket.io
 const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173/', // Fixed typo from allowedOrigins
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  },
+    cors: {
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
+    },
 });
 
-// Attach Socket.io to requests
+// Attach io to all requests
 app.use((req, res, next) => {
-  req.io = io;
-  next();
+    req.io = io;
+    next();
 });
 
-// Socket.IO Events
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.emit("welcome", { message: "Welcome to the WebSocket server!" });
-
-  socket.on("updateData", (data) => {
-    console.log("Received updateData:", data);
-    io.emit("dataUpdated", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
-});
-
-// Broadcast inventory Updates
-export const broadcastInventoryUpdate = () => {
-  io.emit('inventoryUpdate');
-};
-// =======================
-// 3. Routes & Documentation
-// =======================
-// Health Check
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ 
-    status: "OK", 
-    timestamp: new Date(),
-    uptime: process.uptime()
-  });
-});
-
-// Swagger Documentation
+// Swagger Docs
 swaggerDocs(app);
 
-// =======================
-// 4. Error Handling (MUST BE LAST)
-// =======================
-app.use(errorHandler);
+// --- Socket.io Logic ---
+io.on("connection", (socket) => {
+    console.log("New client connected:", socket.id);
 
-// =======================
-// 5. Server Startup
-// =======================
-const PORT = process.env.PORT || 5000
+    // Welcome message
+    socket.emit("welcome", { message: "Welcome to the WebSocket server!" });
+
+    // Join Room
+    socket.on("join-room", (roomId) => {
+        socket.join(roomId);
+        console.log(`Socket ${socket.id} joined room ${roomId}`);
+    });
+
+    // Broadcast update to room
+    socket.on("item-update", (data) => {
+        io.to(data.roomId).emit("item-updated", data);
+    });
+
+    // New item broadcast
+    socket.on("new-item", (data) => {
+        io.to(data.roomId).emit("item-created", data);
+    });
+
+    // Delete item broadcast
+    socket.on("delete-item", (data) => {
+        io.to(data.roomId).emit("item-deleted", data);
+    });
+
+    // Track active users in room
+    socket.on("user-activity", (userData) => {
+        socket.data.user = userData;
+        io.to(userData.roomId).emit("active-users", getUsersInRoom(userData.roomId));
+    });
+
+    // Handle disconnect
+    socket.on("disconnect", () => {
+        console.log("Client disconnected:", socket.id);
+        if (socket.data.user) {
+            io.to(socket.data.user.roomId).emit("active-users", getUsersInRoom(socket.data.user.roomId));
+        }
+    });
+});
+
+// Helper to get all users in a room
+function getUsersInRoom(roomId) {
+    const room = io.sockets.adapter.rooms.get(roomId);
+    if (!room) return [];
+
+    const users = [];
+    for (const socketId of room) {
+        const socket = io.sockets.sockets.get(socketId);
+        if (socket?.data?.user) {
+            users.push(socket.data.user);
+        }
+    }
+    return users;
+}
+
+// Start Server
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📄 API Docs at http://localhost:${PORT}/api-docs`);
-  console.log(`⚡ WebSocket ready at ws://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

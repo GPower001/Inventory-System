@@ -1,34 +1,62 @@
-// import mongoose from "mongoose";
-
-// const itemSchema = new mongoose.Schema({
-//   itemName: { type: String, required: true },
-//   category: { type: String, required: true },
-//   enabled: { type: String, enum: ["Product", "Service"], required: true },
-//   openingQty: { type: Number, default: 0 },
-//   minStock: { type: Number, default: 0 },
-//   date: { type: Date, required: true },
-//   itemCode: { type: String, required: true },
-//   imageUrl: { type: String },
-// }, { timestamps: true });
-
-// export default mongoose.model("Item", itemSchema);
-
+// models/Item.js
 import mongoose from 'mongoose';
 
-const itemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: String,
-  quantity: { type: Number, required: true, min: 0 },
-  minStock: { type: Number, default: 10 },
-  price: { type: Number, required: true, min: 0 },
-  salePrice: { type: Number, min: 0 },
-  category: String,
-  imageUrl: String,
-  expirationDate: Date,
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+const ItemSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    openingQty: {
+      type: Number,
+      required: true,
+    },
+    currentQty: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    minStock: {
+      type: Number,
+      required: true,
+    },
+    image: {
+      type: String, // URL of the item image
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Assuming you have a `User` model for the creator of the item
+      required: true,
+    },
+    addedDate: {
+      type: Date,
+      default: Date.now,
+    },
+    expirationDate: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-itemSchema.index({ name: 'text', description: 'text' });
+const Item = mongoose.model('Item', ItemSchema);
 
-export default mongoose.model('Item', itemSchema);
+export default Item;

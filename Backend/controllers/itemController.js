@@ -1,215 +1,191 @@
-// import Item from "../models/Item.js";
-
-// export const addItem = async (req, res) => {
-//   try {
-//     const { itemName, category, enabled, openingQty, minStock, date, itemCode } = req.body;
-//     const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
-
-//     const newItem = new Item({ itemName, category, enabled, openingQty, minStock, date, itemCode, imageUrl });
-//     await newItem.save();
-
-//     res.status(201).json({ message: "Item added successfully", item: newItem });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-
-
-// import Item from "../models/Item.js";
-
-// /**
-//  * @desc Get all items
-//  * @route GET /api/items
-//  * @access Public
-//  */
-// export const getItems = async (req, res) => {
-//   try {
-//     const items = await Item.find();
-//     res.status(200).json(items);
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
-// /**
-//  * @desc Add new item
-//  * @route POST /api/items
-//  * @access Public
-//  */
-// export const addItem = async (req, res) => {
-//   try {
-//     const { name, quantity, salePrice, purchasePrice } = req.body;
-
-//     if (!name || !quantity) {
-//       return res.status(400).json({ message: "Name and quantity are required" });
-//     }
-
-//     const newItem = new Item({
-//       name,
-//       quantity,
-//       salePrice: salePrice || 0,
-//       purchasePrice: purchasePrice || 0,
-//     });
-
-//     const savedItem = await newItem.save();
-//     res.status(201).json(savedItem);
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
-
+// controllers/itemController.js
 import Item from '../models/Item.js';
-import { broadcastInventoryUpdate } from '../utils/socket.js';
+import StockAdjustment from '../models/StockAdjustment.js';
+import { io } from '../server.js'; // Assuming you're exporting `io` for real-time updates
 
-/**
- * @desc Get items with optional filtering and pagination
- * @route GET /api/items
- * @access Private
- * @param {number} limit - Maximum number of items to return
- * @param {string} filter - Filter type ('low-stock' or 'expired')
- */
-export const getItems = async (req, res) => {
+// Get all items with search filters
+export const getItems = async (req, res, next) => {
   try {
-    const { limit = 5, filter, search } = req.query;
     let query = {};
 
-    // Apply filters
-    if (filter === 'low-stock') {
-      query = { $expr: { $lt: ['$quantity', '$minStock'] } };
-    } else if (filter === 'expired') {
-      query = { expirationDate: { $lt: new Date() } };
+    const { search, category, type, filter, limit = 100 } = req.query;
+
+    if (search) {
+      query.itemName = { $regex: search, $options: 'i' };
     }
 
-    // Add search functionality
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+    if (category) {
+      query.category = category;
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    if (filter === 'low-stock') {
+      query = {
+        ...query,
+        $expr: { $lte: ['$currentQty', '$minStock'] },
+      };
+    }
+
+    if (filter === 'expired') {
+      query.expirationDate = { $lte: new Date() };
     }
 
     const items = await Item.find(query)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit))
-      .select('-__v'); // Exclude version key
+      .sort({ addedDate: -1 })
+      .limit(parseInt(limit));
 
-    res.json({
-      success: true,
-      count: items.length,
-      data: items
-    });
-  } catch (err) {
-    console.error(`Error fetching items: ${err.message}`);
-    res.status(500).json({ 
-      success: false,
-      error: 'Server error'
-    });
+    res.status(200).json(items);
+  } catch (error) {
+    next(error);
   }
 };
 
-/**
- * @desc Create new inventory item
- * @route POST /api/items
- * @access Private
- */
-export const addItem = async (req, res) => {
+// Get a single item
+export const getItem = async (req, res, next) => {
   try {
-    const { name, quantity, minStock, price, salePrice, expirationDate, category } = req.body;
+    const item = await Item.findById(req.params.id);
 
-    // Validation
-    if (!name || !quantity) {
-      return res.status(400).json({
-        success: false,
-        error: 'Name and quantity are required'
-      });
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
     }
 
-    if (quantity < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Quantity cannot be negative'
-      });
-    }
-
-    const newItem = new Item({
-      name,
-      quantity,
-      minStock: minStock || 10,
-      price,
-      salePrice: salePrice || price,
-      expirationDate,
-      category,
-      ...(req.file && { imageUrl: `/uploads/${req.file.filename}` })
-    });
-
-    const savedItem = await newItem.save();
-    
-    // Notify all connected clients
-    broadcastInventoryUpdate();
-
-    res.status(201).json({
-      success: true,
-      data: savedItem
-    });
-  } catch (err) {
-    console.error(`Error adding item: ${err.message}`);
-    
-    // Handle duplicate key error
-    if (err.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        error: 'Item with this name already exists'
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
+    res.status(200).json(item);
+  } catch (error) {
+    next(error);
   }
 };
 
-/**
- * @desc Update an existing item
- * @route PUT /api/items/:id
- * @access Private
- */
-export const updateItem = async (req, res) => {
+// Create a new item
+export const createItem = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-
-    // Prevent certain fields from being updated
-    delete updates._id;
-    delete updates.createdAt;
-
-    const updatedItem = await Item.findByIdAndUpdate(
-      id,
-      { ...updates, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedItem) {
-      return res.status(404).json({
-        success: false,
-        error: 'Item not found'
-      });
+    if (req.files?.image) {
+      req.body.image = `/uploads/${req.files.image[0].filename}`;
     }
 
-    broadcastInventoryUpdate();
-    
-    res.json({
-      success: true,
-      data: updatedItem
+    req.body.currentQty = req.body.openingQty;
+    req.body.createdBy = req.user.id;
+
+    const item = await Item.create(req.body);
+
+    // Record stock adjustment for the newly created item
+    await StockAdjustment.create({
+      item: item._id,
+      adjustmentType: 'initial',
+      quantity: item.openingQty,
+      previousQuantity: 0,
+      newQuantity: item.openingQty,
+      reason: 'Initial stock entry',
+      adjustedBy: req.user.id,
     });
-  } catch (err) {
-    console.error(`Error updating item: ${err.message}`);
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
+
+    io.emit('inventoryUpdate', { action: 'create', item });
+
+    res.status(201).json({ success: true, data: item });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update an item
+export const updateItem = async (req, res, next) => {
+  try {
+    let item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    if (req.files?.image) {
+      req.body.image = `/uploads/${req.files.image[0].filename}`;
+    }
+
+    item = await Item.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
     });
+
+    io.emit('inventoryUpdate', { action: 'update', item });
+
+    res.status(200).json({ success: true, data: item });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete an item
+export const deleteItem = async (req, res, next) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    await item.remove();
+
+    io.emit('inventoryUpdate', { action: 'delete', itemId: req.params.id });
+
+    res.status(200).json({ success: true, message: 'Item deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Adjust stock for an item
+export const adjustStock = async (req, res, next) => {
+  try {
+    const { adjustmentType, quantity, reason, notes } = req.body;
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    const prevQty = item.currentQty;
+    const qty = parseInt(quantity);
+    let newQty;
+
+    switch (adjustmentType) {
+      case 'add':
+        newQty = prevQty + qty;
+        break;
+      case 'remove':
+        newQty = prevQty - qty;
+        if (newQty < 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Cannot remove more than current stock',
+          });
+        }
+        break;
+      case 'set':
+        newQty = qty;
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid adjustment type' });
+    }
+
+    const adjustment = await StockAdjustment.create({
+      item: item._id,
+      adjustmentType,
+      quantity: qty,
+      previousQuantity: prevQty,
+      newQuantity: newQty,
+      reason,
+      notes,
+      adjustedBy: req.user.id,
+    });
+
+    item.currentQty = newQty;
+    await item.save();
+
+    io.emit('inventoryUpdate', { action: 'adjust', item });
+
+    res.status(200).json({ success: true, data: adjustment });
+  } catch (error) {
+    next(error);
   }
 };
