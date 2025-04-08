@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import { Card, CardContent } from "../components/ui/card";
@@ -51,6 +49,13 @@ const Dashboard = () => {
         api.get('/items?limit=5') // Get latest 5 items
       ]);
 
+      // Validate inventory data before setting it
+      if (Array.isArray(inventoryResponse.data)) {
+        setInventory(inventoryResponse.data);
+      } else {
+        setInventory([]); // Ensure it's an empty array if invalid
+      }
+
       setDashboardData({
         products: statsResponse.data.totalProducts,
         lowStock: statsResponse.data.lowStockItems,
@@ -65,8 +70,6 @@ const Dashboard = () => {
           data: revenueResponse.data.amounts
         }]
       });
-
-      setInventory(inventoryResponse.data);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.error || err.message);
@@ -154,15 +157,11 @@ const Dashboard = () => {
       <CardContent className="h-full flex flex-col min-h-0">
         <h2 className="text-lg font-medium">Revenue</h2>
       <p className="text-2xl font-bold text-teal-600">
-          £{(revenueData.datasets?.[0]?.data?.reduce((a, b) => a + b, 0) || 0)}
-        .toLocaleString()
-      </p>
-        {/* <p className="text-2xl font-bold text-teal-600">
-          £{revenueData?.datasets?.[0]?.data?.reduce((a, b) => a + b, 0)?.toLocaleString() || '0'}
-        </p> */}
+          £{(revenueData.datasets?.[0]?.data?.reduce((a, b) => a + b, 0) || 0).toLocaleString()}
+        </p>
         
         <div className="flex-grow w-full min-h-0">
-          {revenueData.datasets[0].data.length > 0 ? (
+        {revenueData?.datasets?.[0]?.data?.length > 0 ? (
             <Bar
               data={revenueData}
               options={{
@@ -215,29 +214,29 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {inventory.map((item) => (
-                <tr key={item._id} className="border-b">
-                  <td className="p-2">
-                    <img
-                      src={item.imageUrl || "https://via.placeholder.com/50"}
-                      alt={item.name}
-                      className="h-12 w-12 rounded-md object-cover"
-                    />
-                  </td>
-                  <td className="p-2">{item.name}</td>
-                  <td className={`p-2 ${
-                    item.quantity < (item.minStock || 10) ? 'text-red-500 font-bold' : ''
-                  }`}>
-                    {item.quantity}
-                  </td>
-                  <td className="p-2">£{item.salePrice?.toFixed(2) || '0.00'}</td>
-                  <td className={`p-2 ${
-                    new Date(item.expirationDate) < new Date() ? 'text-red-500 font-bold' : ''
-                  }`}>
-                    {item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}
-                  </td>
-                </tr>
-              ))}
+              {Array.isArray(inventory) && inventory.length > 0 ? (
+                inventory.map((item) => (
+                  <tr key={item._id} className="border-b">
+                    <td className="p-2">
+                      <img
+                        src={item.imageUrl || "https://via.placeholder.com/50"}
+                        alt={item.name}
+                        className="h-12 w-12 rounded-md object-cover"
+                      />
+                    </td>
+                    <td className="p-2">{item.name}</td>
+                    <td className={`p-2 ${item.quantity < (item.minStock || 10) ? 'text-red-500 font-bold' : ''}`}>
+                      {item.quantity}
+                    </td>
+                    <td className="p-2">£{item.salePrice?.toFixed(2) || '0.00'}</td>
+                    <td className={`p-2 ${new Date(item.expirationDate) < new Date() ? 'text-red-500 font-bold' : ''}`}>
+                      {item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="5">No inventory available...</td></tr>
+              )}
             </tbody>
           </table>
         </div>

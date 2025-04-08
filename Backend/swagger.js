@@ -1,5 +1,8 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const options = {
     definition: {
@@ -9,7 +12,7 @@ const options = {
             version: "1.0.0",
             description: "API Documentation for our real-time e-commerce platform",
         },
-        servers: [{ url: "http://localhost:5000" }],
+        servers: [{ url: process.env.PORT|| "http://localhost:5000" }], 
         components: {
             securitySchemes: {
                 bearerAuth: {
@@ -27,7 +30,7 @@ const swaggerSpec = swaggerJSDoc(options);
 
 const swaggerDocs = (app) => {
     app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
-    console.log("Swagger Docs available at http://localhost:5000/api-docs");
+    console.log(`Swagger Docs available at https://${process.env.PORT || "http://localhost:5000"}/api-docs`);
 };
 
 export default swaggerDocs;

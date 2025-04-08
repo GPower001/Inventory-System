@@ -5,7 +5,7 @@ import SideBar from "../components/Sidebar2";
 import BackToTop from "../components/BackToTop"
 
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = () => {
   return (
     <div className="flex h-screen w-[100vw]">
       <SideBar />

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { ImagePlus, Calendar, X } from "lucide-react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { ImagePlus, X } from "lucide-react";
+import { io } from "socket.io-client"; // Import Socket.io client
+import PropTypes from 'prop-types'; 
 
 const AddItems = ({ onClose }) => {
   const [enabled, setEnabled] = useState(false);
@@ -14,10 +15,11 @@ const AddItems = ({ onClose }) => {
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [socket, setSocket] = useState(null); // Socket state
 
-  const endpoint = "/api/items"; // Define this variable before using it
+  const endpoint = "/api/items"; // API endpoint
 
-
+  // Generate item code function
   const generateItemCode = () => {
     const code = `ITEM-${Math.floor(1000 + Math.random() * 9000)}`;
     setItemCode(code);
@@ -34,13 +36,13 @@ const AddItems = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     if (!itemName || !category) {
       alert("Please fill in required fields.");
       setLoading(false);
       return;
     }
-
+  
     try {
       const formData = new FormData();
       formData.append("itemName", itemName);
@@ -51,16 +53,27 @@ const AddItems = ({ onClose }) => {
       formData.append("date", date);
       formData.append("itemCode", itemCode);
       if (image) formData.append("image", image);
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}${endpoint}`,
-         formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+  
+      const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+        method: "POST",
+        body: formData,
       });
-
+  
+      if (!response.ok) {
+        throw new Error("Failed to add item.");
+      }
+  
+      const data = await response.json();
       alert("Item added successfully!");
-      console.log(response.data);
-
+      console.log(data);
+  
+      // Emit real-time event after item is added
+      socket.emit("new-item", {
+        roomId: "inventory", // Use the correct room or category
+        item: data,
+      });
+  
+      // Reset form after successful submission
       setItemName("");
       setCategory("");
       setOpeningQty("");
@@ -77,16 +90,29 @@ const AddItems = ({ onClose }) => {
     }
   };
 
+  // Set up socket connection
+  useEffect(() => {
+    const socketConnection = io(import.meta.env.VITE_API_URL); // Connect to the backend
+    setSocket(socketConnection);
 
+    // Listen for real-time updates when an item is created
+    socketConnection.on("item-created", (data) => {
+      console.log("New item created:", data);
+      // Handle real-time updates here (e.g., show a notification)
+    });
+
+    // Clean up socket connection on component unmount
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, []);
 
   return (
     <div>
       <div className="bg-white h-[80vh] rounded-lg shadow-lg">
-        {/* Header */}
         <div className="flex items-center justify-between bg-teal-800 text-white p-4 rounded-t-lg">
           <div className="flex gap-6 items-center">
             <h2 className="text-2xl font-semibold">Add Item</h2>
-            {/* Toggle: Product / Service */}
             <div className="flex items-center space-x-4 bg-teal-800 text-white">
               <span>Product</span>
               <div
@@ -109,7 +135,6 @@ const AddItems = ({ onClose }) => {
           </button>
         </div>
 
-        {/* Form Fields */}
         <div className="p-6">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-4 gap-4 items-center">
@@ -147,7 +172,6 @@ const AddItems = ({ onClose }) => {
                 Select Units
               </button>
 
-              {/* Image Upload */}
               <label className="flex items-center space-x-1 text-gray-700 cursor-pointer">
                 <ImagePlus size={18} />
                 <span>Add Image</span>
@@ -161,7 +185,6 @@ const AddItems = ({ onClose }) => {
               </div>
             )}
 
-            {/* Buttons Section */}
             <div className="flex items-center mt-4 space-x-4">
               <div className="flex border border-gray-600 rounded px-3 py-1 items-center">
                 <span className="text-gray-700 mr-2">Item Code</span>
@@ -172,7 +195,6 @@ const AddItems = ({ onClose }) => {
               {itemCode && <span className="text-teal-700 font-medium">{itemCode}</span>}
             </div>
 
-            {/* Stock Section */}
             <div className="w-full p-4">
               <div className="flex items-center border-b border-gray-400 pb-1">
                 <h2 className="text-lg font-semibold text-gray-700">Stock</h2>
@@ -213,9 +235,23 @@ const AddItems = ({ onClose }) => {
               </div>
             </div>
 
-            <button type="submit" className="bg-teal-600 text-white px-6 py-2 rounded-md mt-4">
-              Save Item
-            </button>
+            <button 
+      type="submit" 
+      className="bg-teal-600 text-white px-6 py-2 rounded-md mt-4 flex items-center justify-center gap-2"
+      disabled={loading}
+    >
+      {loading ? (
+        <>
+          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Saving...
+        </>
+         ) : (
+          'Save Item'
+        )}
+      </button>
           </form>
         </div>
       </div>
@@ -223,7 +259,9 @@ const AddItems = ({ onClose }) => {
   );
 };
 
+
+AddItems.propTypes = {
+  onClose: PropTypes.func.isRequired
+};
+
 export default AddItems;
-
-
-

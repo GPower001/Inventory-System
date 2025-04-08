@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+
+
+
+import  { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";  
 import "./login.css";
 
 function Login() {
@@ -13,6 +17,7 @@ function Login() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const navigate = useNavigate();  // For navigation without page reload
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,20 +29,21 @@ function Login() {
         setError("");
 
         try {
-            const endpoint = type === "register" ? "/auth/register" : "/auth/login";
+         
+            const endpoint = type === "register" ? "/register" : "/login";
             const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}${endpoint}`,
+                `${import.meta.env.VITE_API_URL}${endpoint}`, // ✅ Will become http://localhost:2000/api/auth/register
                 formData,
-                { withCredentials: true } // Ensures cookies (if using JWT)
+                { withCredentials: true }
             );
+            
 
             console.log("Response:", response.data);
             alert(response.data.message || "Success!");
 
             if (type === "login") {
                 localStorage.setItem("authToken", response.data.token);
-
-                window.location.href = "/dashboard";
+                navigate("/dashboard"); 
             }
         } catch (err) {
             setError(err.response?.data?.message || "An error occurred");
