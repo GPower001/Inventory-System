@@ -94,154 +94,122 @@ const Dashboard = () => {
 
   return (
     <ErrorBoundary>
-      <div className="p-6">
-      {/* Header */}
-      <h1 className="text-xl font-semibold">
-        Hello <span className="font-bold">Grace Mark!</span>{" "}
-        <span className="text-teal-500">Analytics For this week</span>
-      </h1>
-
-      {/* Stock Update Section */}
-      <div className="grid grid-cols-3 gap-4 my-6">
-        {/* Product Card */}
-        <Card className="p-4">
-          <CardContent className="flex flex-col gap-2 text-center">
-            <h2 className="text-lg font-medium">Products</h2>
-            <p className="text-2xl font-bold">{dashboardData.products} items</p>
-            <button
-              className="bg-teal-500 text-white px-4 py-1 rounded-md"
-              onClick={() => window.location = '/products'}
-            >
-              View
-            </button>
-          </CardContent>
-        </Card>
-
-        {/* Low Stock Card */}
-        <Card className="p-4 border border-red-500">
-          <CardContent className="flex flex-col gap-2 text-center">
-            <div className="flex justify-between">
-              <h2 className="text-lg font-medium">Low Stock</h2>
-              <AlertTriangle className="text-red-500" size={20} />
+      <div className="p-4 md:p-6 lg:p-8 w-full">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
+          {/* Total Items Card */}
+          <div className="bg-white rounded-lg shadow p-4 md:p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base md:text-lg font-semibold text-gray-700">Total Items</h3>
+                <p className="text-xl md:text-2xl font-bold">{dashboardData.products} items</p>
+              </div>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Package className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+              </div>
             </div>
-            <p className="text-2xl font-bold">{dashboardData.lowStock} items</p>
-            <button
-              className="bg-teal-500 text-white px-4 py-1 rounded-md"
-              onClick={() => window.location = '/products?filter=low-stock'}
-            >
-              View
-            </button>
-          </CardContent>
-        </Card>
-
-        {/* Expiry Alert Card */}
-        <Card className="p-4 border border-red-500">
-          <CardContent className="flex flex-col gap-2 text-center">
-            <div className="flex justify-between">
-              <h2 className="text-lg font-medium">Expiry Alert</h2>
-              <Bell className="text-red-500" size={20} />
-            </div>
-            <p className="text-2xl font-bold">{dashboardData.expiryAlerts} items</p>
-            <button
-              className="bg-teal-500 text-white px-4 py-1 rounded-md"
-              onClick={() => window.location = '/products?filter=expired'}
-            >
-              View
-            </button>
-          </CardContent>
-        </Card>
-      </div>
-
-     {/* Revenue Chart */}
-    <Card className="p-4 h-[50vh] min-h-0">
-      <CardContent className="h-full flex flex-col min-h-0">
-        <h2 className="text-lg font-medium">Revenue</h2>
-      <p className="text-2xl font-bold text-teal-600">
-          £{(revenueData.datasets?.[0]?.data?.reduce((a, b) => a + b, 0) || 0).toLocaleString()}
-        </p>
-        
-        <div className="flex-grow w-full min-h-0">
-        {revenueData?.datasets?.[0]?.data?.length > 0 ? (
-            <Bar
-              data={revenueData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-              }}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p>No revenue data available...</p>
-            </div>
-          )}
-        </div>
-        {dashboardData.lastUpdated && (
-          <div className="text-sm text-gray-500 mt-2">
-            Last updated: {new Date(dashboardData.lastUpdated).toLocaleString()}
           </div>
-        )}
-      </CardContent>
-    </Card>
 
-      {/* Report Section */}
-      <div className="mt-6 flex gap-4">
-        <div className="border p-4 w-1/4">
-          <h2 className="text-lg font-medium">Report</h2>
-          <p className="text-sm">
-            {dashboardData.lowStock > 0 ? (
-              `${dashboardData.lowStock} items need restocking`
-            ) : (
-              "Inventory levels are good"
-            )}
-          </p>
-          {dashboardData.expiryAlerts > 0 && (
-            <p className="text-sm mt-2 text-red-500">
-              {dashboardData.expiryAlerts} items nearing expiration
-            </p>
-          )}
+          {/* Low Stock Card */}
+          <div className="bg-white rounded-lg shadow p-4 md:p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base md:text-lg font-semibold text-gray-700">Low Stock</h3>
+                <p className="text-xl md:text-2xl font-bold">{dashboardData.lowStock} items</p>
+              </div>
+              <div className="p-3 bg-yellow-100 rounded-full">
+                <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Expiring Soon Card */}
+          <div className="bg-white rounded-lg shadow p-4 md:p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base md:text-lg font-semibold text-gray-700">Expiring Soon</h3>
+                <p className="text-xl md:text-2xl font-bold">{dashboardData.expiryAlerts} items</p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-full">
+                <Clock className="w-6 h-6 md:w-8 md:h-8 text-red-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Inventory Table */}
-        <div className="border p-4 w-3/4">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="p-2">Item</th>
-                <th className="p-2">Item Name</th>
-                <th className="p-2">Stock Left</th>
-                <th className="p-2">Price</th>
-                <th className="p-2">Expiry Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(inventory) && inventory.length > 0 ? (
-                inventory.map((item) => (
-                  <tr key={item._id} className="border-b">
-                    <td className="p-2">
-                      <img
-                        src={item.imageUrl || "https://via.placeholder.com/50"}
-                        alt={item.name}
-                        className="h-12 w-12 rounded-md object-cover"
-                      />
-                    </td>
-                    <td className="p-2">{item.name}</td>
-                    <td className={`p-2 ${item.quantity < (item.minStock || 10) ? 'text-red-500 font-bold' : ''}`}>
-                      {item.quantity}
-                    </td>
-                    <td className="p-2">£{item.salePrice?.toFixed(2) || '0.00'}</td>
-                    <td className={`p-2 ${new Date(item.expirationDate) < new Date() ? 'text-red-500 font-bold' : ''}`}>
-                      {item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr><td colSpan="5">No inventory available...</td></tr>
-              )}
-            </tbody>
-          </table>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+          {/* Revenue Chart */}
+          <div className="bg-white rounded-lg shadow p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-4">Revenue Overview</h3>
+            <div className="w-full h-[300px] md:h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dashboardData.revenueData || []}>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="amount" stroke="#3B82F6" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Inventory Chart */}
+          <div className="bg-white rounded-lg shadow p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-4">Inventory Distribution</h3>
+            <div className="w-full h-[300px] md:h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={dashboardData.inventoryData || []}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius="80%"
+                    fill="#3B82F6"
+                    label
+                  >
+                    {(dashboardData.inventoryData || []).map((entry, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Alerts Section */}
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <h3 className="text-base md:text-lg font-semibold text-gray-700">Alerts & Notifications</h3>
+            {dashboardData.lastUpdated && (
+              <p className="text-sm text-gray-500 mt-2 md:mt-0">
+                Last updated: {new Date(dashboardData.lastUpdated).toLocaleString()}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {dashboardData.lowStock > 0 ? (
+              <div className="flex items-center p-3 bg-yellow-50 text-yellow-700 rounded-lg">
+                <AlertTriangle className="w-5 h-5 mr-2" />
+                <p className="text-sm md:text-base">{`${dashboardData.lowStock} items need restocking`}</p>
+              </div>
+            ) : null}
+
+            {dashboardData.expiryAlerts > 0 && (
+              <div className="flex items-center p-3 bg-red-50 text-red-700 rounded-lg">
+                <Clock className="w-5 h-5 mr-2" />
+                <p className="text-sm md:text-base">{dashboardData.expiryAlerts} items nearing expiration</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </ErrorBoundary>
     
   );

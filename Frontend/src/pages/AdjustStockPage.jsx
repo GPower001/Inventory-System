@@ -1,5 +1,3 @@
-
-
 import  { useState } from 'react';
 import AdjustStockModal from '../components/AdjustStockModal';
 import { Search } from 'lucide-react';
@@ -62,9 +60,9 @@ const AdjustStockPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Adjust Stock Levels</h1>
-        <div className="relative w-64">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Adjust Stock Levels</h1>
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
@@ -76,52 +74,56 @@ const AdjustStockPage = () => {
         </div>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {item.quantity <= item.lowStockThreshold ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        Low Stock
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        In Stock
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => setSelectedItem(item)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Adjust Stock
-                    </button>
+      <div className="bg-white shadow-sm rounded-lg overflow-x-auto">
+        <div className="min-w-full">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                  <tr key={item._id} className="hover:bg-gray-50">
+                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-base">
+                      <div className="font-medium text-gray-900 break-words">{item.name}</div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm sm:text-base whitespace-nowrap">{item.quantity}</td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      {item.quantity <= item.lowStockThreshold ? (
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Low Stock
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          In Stock
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => setSelectedItem(item)}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base"
+                      >
+                        Adjust Stock
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="px-4 sm:px-6 py-4 text-center text-gray-500 text-sm sm:text-base">
+                    {searchTerm ? 'No matching items found' : 'No items available'}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                  {searchTerm ? 'No matching items found' : 'No items available'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedItem && (

@@ -108,13 +108,13 @@ const AddItems = ({ onClose }) => {
   }, []);
 
   return (
-    <div>
-      <div className="bg-white h-[80vh] rounded-lg shadow-lg">
-        <div className="flex items-center justify-between bg-teal-800 text-white p-4 rounded-t-lg">
-          <div className="flex gap-6 items-center">
-            <h2 className="text-2xl font-semibold">Add Item</h2>
+    <div className="p-4">
+      <div className="bg-white min-h-[80vh] rounded-lg shadow-lg">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-teal-800 text-white p-4 rounded-t-lg gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center w-full sm:w-auto">
+            <h2 className="text-xl sm:text-2xl font-semibold">Add Item</h2>
             <div className="flex items-center space-x-4 bg-teal-800 text-white">
-              <span>Product</span>
+              <span className="text-sm sm:text-base">Product</span>
               <div
                 className={`w-10 h-5 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer ${
                   enabled ? "bg-teal-500" : ""
@@ -127,19 +127,19 @@ const AddItems = ({ onClose }) => {
                   }`}
                 ></div>
               </div>
-              <span>Service</span>
+              <span className="text-sm sm:text-base">Service</span>
             </div>
           </div>
-          <button className="text-white" onClick={onClose}>
+          <button className="text-white absolute top-4 right-4 sm:static" onClick={onClose}>
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-6">
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-4 gap-4 items-center">
+        <div className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
               <div className="relative w-full">
-                <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium">
+                <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium text-sm">
                   Item Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -152,7 +152,7 @@ const AddItems = ({ onClose }) => {
               </div>
 
               <div className="relative w-full">
-                <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium">
+                <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium text-sm">
                   Category <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -168,14 +168,14 @@ const AddItems = ({ onClose }) => {
                 </select>
               </div>
 
-              <button type="button" className="bg-teal-500 text-white px-4 py-2 rounded">
+              <button type="button" className="w-full sm:w-auto bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 transition">
                 Select Units
               </button>
 
-              <label className="flex items-center space-x-1 text-gray-700 cursor-pointer">
+              <label className="flex items-center justify-center sm:justify-start space-x-2 text-gray-700 cursor-pointer p-2 border border-dashed border-gray-400 rounded">
                 <ImagePlus size={18} />
-                <span>Add Image</span>
-                <input type="file" className="hidden" onChange={handleImageUpload} />
+                <span className="text-sm">Add Image</span>
+                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
               </label>
             </div>
 
@@ -185,73 +185,82 @@ const AddItems = ({ onClose }) => {
               </div>
             )}
 
-            <div className="flex items-center mt-4 space-x-4">
-              <div className="flex border border-gray-600 rounded px-3 py-1 items-center">
-                <span className="text-gray-700 mr-2">Item Code</span>
-                <button type="button" className="bg-teal-500 text-white px-3 py-1 rounded" onClick={generateItemCode}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex w-full sm:w-auto border border-gray-600 rounded px-3 py-1 items-center">
+                <span className="text-gray-700 mr-2 text-sm">Item Code</span>
+                <button 
+                  type="button" 
+                  className="bg-teal-500 text-white px-3 py-1 rounded hover:bg-teal-600 transition"
+                  onClick={generateItemCode}
+                >
                   Generate
                 </button>
               </div>
-              {itemCode && <span className="text-teal-700 font-medium">{itemCode}</span>}
+              {itemCode && <span className="text-teal-700 font-medium break-all">{itemCode}</span>}
             </div>
 
             <div className="w-full p-4">
               <div className="flex items-center border-b border-gray-400 pb-1">
                 <h2 className="text-lg font-semibold text-gray-700">Stock</h2>
               </div>
-
-              <div className="grid grid-cols-2 gap-6 mt-4">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <label className="w-48 text-gray-600 font-medium">Opening Quantity</label>
-                    <input
-                      type="number"
-                      value={openingQty}
-                      onChange={(e) => setOpeningQty(e.target.value)}
-                      className="border border-gray-400 rounded-md px-3 py-2 w-40 focus:border-teal-500 outline-none"
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <label className="w-48 text-gray-600 font-medium">Min Stock To Maintain</label>
-                    <input
-                      type="number"
-                      value={minStock}
-                      onChange={(e) => setMinStock(e.target.value)}
-                      className="border border-gray-400 rounded-md px-3 py-2 w-40 focus:border-teal-500 outline-none"
-                    />
-                  </div>
+              
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="relative w-full">
+                  <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium text-sm">
+                    Opening Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={openingQty}
+                    onChange={(e) => setOpeningQty(e.target.value)}
+                    className="w-full border border-gray-500 rounded-md py-2 px-3 outline-none focus:ring-0 focus:border-teal-600"
+                  />
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <label className="text-gray-600 font-medium">As Of Date</label>
+                <div className="relative w-full">
+                  <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium text-sm">
+                    Minimum Stock Level
+                  </label>
+                  <input
+                    type="number"
+                    value={minStock}
+                    onChange={(e) => setMinStock(e.target.value)}
+                    className="w-full border border-gray-500 rounded-md py-2 px-3 outline-none focus:ring-0 focus:border-teal-600"
+                  />
+                </div>
+
+                <div className="relative w-full">
+                  <label className="absolute -top-3 left-2 bg-white px-1 text-teal-700 font-medium text-sm">
+                    Expiry Date
+                  </label>
                   <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="border border-gray-400 rounded-md px-3 py-2 w-40 focus:border-teal-500 outline-none"
+                    className="w-full border border-gray-500 rounded-md py-2 px-3 outline-none focus:ring-0 focus:border-teal-600"
                   />
                 </div>
               </div>
             </div>
 
-            <button 
-      type="submit" 
-      className="bg-teal-600 text-white px-6 py-2 rounded-md mt-4 flex items-center justify-center gap-2"
-      disabled={loading}
-    >
-      {loading ? (
-        <>
-          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Saving...
-        </>
-         ) : (
-          'Save Item'
-        )}
-      </button>
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-6 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? "Adding..." : "Add Item"}
+              </button>
+            </div>
           </form>
         </div>
       </div>
